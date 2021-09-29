@@ -42,9 +42,16 @@ export const handle: APIGatewayProxyHandler = async (event) => {
 
   console.log(">>> Generate/certificate.handle is saving to s3 now!!!");
 
+  console.log("process.env.AWS_BUCKET: ", process.env.AWS_BUCKET);
+  console.log("process.env.AWS_S3_URL: ", process.env.AWS_S3_URL);
+
+  const Bucket = `reports-certs/certificates`; // `${process.env.AWS_BUCKET}`;
+  const AWS_S3_URL = "https://reports-certs.s3.amazonaws.com/";
+
+  console.log(`>>> Generate/certificate.handle ${Bucket}`);
   await s3
     .putObject({
-      Bucket: `${process.env.AWS_BUCKET}/certificates`,
+      Bucket,
       Key: key_name,
       Body: pdf_buffer,
       ACL: "public-read",
@@ -54,11 +61,11 @@ export const handle: APIGatewayProxyHandler = async (event) => {
 
   console.log(">>> Generate/certificate.handle is creating url to PDF!");
 
-  const image_url = `${process.env.AWS_S3_URL}certificates/${key_name}`;
+  const image_url = `${AWS_S3_URL}certificates/${key_name}`;
 
   console.log(">>> Generate/certificate.handle is saving the user found!!!");
 
-  userRepository.update({ id, grade, certificate: image_url, name });
+  await userRepository.update({ id, grade, certificate: image_url, name });
 
   console.log(">>> Generate/certificate.handle will return to url with PDF!");
 

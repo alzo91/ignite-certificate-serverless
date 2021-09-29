@@ -62,6 +62,10 @@ module.exports = {
           from: "./src/templates",
           to: path.join(__dirname, ".webpack", "service", "src", "templates"),
         },
+        {
+          from: ".env",
+          to: path.join(__dirname, ".webpack", "service"),
+        },
       ],
     }),
   ],
