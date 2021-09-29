@@ -3,10 +3,9 @@ service: ignite-certificate
 useDotenv: true
 
 plugins:
-  - serverless-offline
   - serverless-webpack
+  - serverless-offline
   - serverless-dynamodb-local
-  - serverless-iam-roles-per-function
 
 custom:
   webpack:
@@ -23,21 +22,19 @@ custom:
   bucket: reports-certs
 
 provider:
-  lambdaHashingVersion: 20201221
   name: aws
-  runtime: nodejs14.x
   region: us-east-1
-  iam:
-    role:
-      statements:
-        - Effect: "Allow"
-          Action:
-            - dynamodb:*
-          Resource: "*"
-        - Effect: "Allow"
-          Action:
-            - s3:*
-          Resource: "*"
+  runtime: nodejs14.x
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - s3:*
+      Resource: "arn:aws:s3:::*/*"
+
 functions:
   hello:
     handler: src/functions/hello.handle
@@ -53,17 +50,13 @@ functions:
           path: /generate/certificate
           cors: true
           method: post
-    iam:
-      role:
-        statements:
-          - Effect: "Allow"
-            Action:
-              - dynamodb:*
-            Resource: "arn:aws:dynamodb:${self.provider.region}:*:table/users_certificates"
-          - Effect: "Allow"
-            Action:
-              - s3:*
-            Resource: "*"
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+          - dynamodb:PutItem
+          - dynamodb:UpdateItem
+        Resource: "arn:aws:dynamodb:${self.provider.region}:*:table/users_certificates"
   verifyCertificate:
     handler: src/functions/verify/certificate.handle
     events:
@@ -71,13 +64,12 @@ functions:
           path: /verify/certificate/{id}
           cors: true
           method: get
-    iam:
-      role:
-        statements:
-          - Effect: "Allow"
-            Action:
-              - dynamodb:Query
-            Resource: "arn:aws:dynamodb:${self.provider.region}:*:table/users_certificates"
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: "arn:aws:dynamodb:${self.provider.region}:*:table/users_certificates"
+
 resources:
   Resources:
     dbCertificateUsers:
