@@ -24,7 +24,7 @@ class UsersRepository implements IUsersRepository {
     const user = {
       id: existUser.id,
       grade: existUser.grade,
-      name: existUser.name,
+      name: existUser.full_name,
       certificate: existUser.certificate,
     };
 
