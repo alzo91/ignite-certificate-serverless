@@ -10,7 +10,7 @@ export const handle: APIGatewayProxyHandler = async (event) => {
     body: JSON.stringify({
       message: "Hello world that serverless",
       toDay: to_day,
-      version: "v018",
+      version: "v020",
     }),
     headers: {
       "Content-Type": "application/json",

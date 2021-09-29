@@ -6,8 +6,15 @@ plugins:
   - serverless-webpack
   - serverless-offline
   - serverless-dynamodb-local
+  - serverless-dotenv-plugin
 
 custom:
+  dotenv:
+    path: ".env"
+    include:
+      - AWS_BUCKET
+      - AWS_BUCKET_REGION
+      - AWS_S3_URL
   webpack:
     webpackConfig: ./webpack.config.js
     includeModules: true
