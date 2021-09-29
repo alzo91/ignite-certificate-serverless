@@ -34,9 +34,7 @@ export const handle: APIGatewayProxyHandler = async (event) => {
 
   console.log(">>> Generate/certificate.handle will save PDF to s3");
 
-  const s3 = new S3({ region: process.env.AWS_BUCKET_REGION });
-
-  const Bucket = `${process.env.AWS_BUCKET}/certificates`;
+  const s3 = new S3();
 
   const to_date = dayjs().format("YYYY-MM-DD");
 
@@ -46,7 +44,7 @@ export const handle: APIGatewayProxyHandler = async (event) => {
 
   await s3
     .putObject({
-      Bucket,
+      Bucket: `${process.env.AWS_BUCKET}/certificates`,
       Key: key_name,
       Body: pdf_buffer,
       ACL: "public-read",
