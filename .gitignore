@@ -1,0 +1,18 @@
+# package directories
+node_modules
+jspm_packages
+
+# Serverless directories
+.serverless
+
+# Webpack directories
+.webpack
+
+# DynamoDB
+.dynamodb
+
+.env
+
+*.pdf
+
+yarn.lock

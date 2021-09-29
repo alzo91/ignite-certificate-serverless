@@ -1,0 +1,95 @@
+service: ignite-certificate
+
+useDotenv: true
+
+plugins:
+  - serverless-offline
+  - serverless-webpack
+  - serverless-dynamodb-local
+  - serverless-iam-roles-per-function
+
+custom:
+  webpack:
+    webpackConfig: ./webpack.config.js
+    includeModules: true
+  dynamodb:
+    stages:
+      - dev
+      - local
+    start:
+      port: 8000
+      inMemory: true
+      migrate: true
+  bucket: reports-certs
+
+provider:
+  lambdaHashingVersion: 20201221
+  name: aws
+  runtime: nodejs14.x
+  region: us-east-1
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - dynamodb:*
+          Resource: "*"
+        - Effect: "Allow"
+          Action:
+            - s3:*
+          Resource: "*"
+functions:
+  hello:
+    handler: src/functions/hello.handle
+    events:
+      - http:
+          path: /hello
+          cors: true
+          method: get
+  generateCertificate:
+    handler: src/functions/generate/certificate.handle
+    events:
+      - http:
+          path: /generate/certificate
+          cors: true
+          method: post
+    iam:
+      role:
+        statements:
+          - Effect: "Allow"
+            Action:
+              - dynamodb:*
+            Resource: "arn:aws:dynamodb:${self.provider.region}:*:table/users_certificates"
+          - Effect: "Allow"
+            Action:
+              - s3:*
+            Resource: "*"
+  verifyCertificate:
+    handler: src/functions/verify/certificate.handle
+    events:
+      - http:
+          path: /verify/certificate/{id}
+          cors: true
+          method: get
+    iam:
+      role:
+        statements:
+          - Effect: "Allow"
+            Action:
+              - dynamodb:Query
+            Resource: "arn:aws:dynamodb:${self.provider.region}:*:table/users_certificates"
+resources:
+  Resources:
+    dbCertificateUsers:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        ProvisionedThroughput:
+          WriteCapacityUnits: 5
+          ReadCapacityUnits: 5
+        TableName: users_certificates
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
